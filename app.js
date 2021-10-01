@@ -1,5 +1,8 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+
+const connectDb = require('./utils/connectDb');
 const HttpError = require('./utils/httpError');
 const ErrorMiddleware = require('./middlewares/errors');
 
@@ -12,10 +15,15 @@ app.use(morgan('dev'));
 
 app.use(ErrorMiddleware);
 
+app.use('/', (req, res) => {
+    res.json({ e: 'Working!!!!' });
+});
+
 app.all('*', (req, res, next) => {
     next(new HttpError(`Can not find ${req.originalUrl} on this server`, 404));
 });
 
 app.listen(PORT, () => {
     console.log(`Server running at port ${PORT}`);
+    connectDb();
 });
