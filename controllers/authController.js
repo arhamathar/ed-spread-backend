@@ -107,17 +107,54 @@ exports.forgotPassword = async (req, res, next) => {
         }
 
         const resetToken = crypto.randomBytes(32).toString('hex');
-        user.resetToken = crypto
+        const hashedResetToken = crypto
             .createHash('sha256')
             .update(resetToken)
             .digest('hex');
+        user.resetToken = hashedResetToken;
         user.resetTokenExpires = Date.now() + 10 * 60 * 1000;
 
         await user.save();
 
         res.status(200).json({ status: 'success' });
     } catch (e) {
-        console.log(e);
-        next(new HttpError('Signed Up failed, please try again !', 500));
+        next(
+            new HttpError('Resetting passwrod failed, please try again !', 500)
+        );
+    }
+};
+
+exports.resetPassword = async (req, res, next) => {
+    // const hashedResetToken = crypto
+    //     .createHash('sha256')
+    //     .update(req.params.token)
+    //     .digest('hex');
+
+    try {
+        const user = await User.findOne({
+            resetToken: req.params.token,
+            resetTokenExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return next(new HttpError('Token is invalid or expired !', 400));
+        }
+        const hashedNewPassword = await bcrypt.hash(req.body.password, 12);
+
+        user.password = hashedNewPassword;
+        user.resetToken = undefined;
+        user.resetTokenExpires = undefined;
+
+        await user.save();
+        const token = generateToken(user._id);
+
+        res.status(200).json({
+            status: 'success',
+            user: { id: user._id, token },
+        });
+    } catch (e) {
+        next(
+            new HttpError('Resetting password failed, please try again !', 500)
+        );
     }
 };
