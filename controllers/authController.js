@@ -1,14 +1,14 @@
 const express = require('express');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { check, validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
 const User = require('../models/user');
 const HttpError = require('../utils/httpError');
-const user = require('../models/user');
 
-const generateToken = (id, email) =>
-    jwt.sign({ id, email }, process.env.JWT_SECRET, {
+const generateToken = (id) =>
+    jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
@@ -38,7 +38,7 @@ exports.signup = async (req, res, next) => {
             mobile,
             password: hashedPassword,
         });
-        const token = generateToken(newUser._id, newUser.email);
+        const token = generateToken(newUser._id);
 
         res.status(201).json({
             status: 'success',
@@ -77,12 +77,45 @@ exports.login = async (req, res, next) => {
             return next(new HttpError('Password is incorrect.', 401));
         }
 
-        const token = generateToken(existingUser._id, existingUser.email);
+        const token = generateToken(existingUser._id);
 
         res.status(200).json({
             status: 'success',
             user: { id: existingUser._id, token },
         });
+    } catch (e) {
+        console.log(e);
+        next(new HttpError('Signed Up failed, please try again !', 500));
+    }
+};
+
+exports.forgotPassword = async (req, res, next) => {
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+        return next(
+            new HttpError('Invalid credentials, check your credentials', 422)
+        );
+    }
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return next(
+                new HttpError('User does not exists for provided email', 404)
+            );
+        }
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        user.resetToken = crypto
+            .createHash('sha256')
+            .update(resetToken)
+            .digest('hex');
+        user.resetTokenExpires = Date.now() + 10 * 60 * 1000;
+
+        await user.save();
+
+        res.status(200).json({ status: 'success' });
     } catch (e) {
         console.log(e);
         next(new HttpError('Signed Up failed, please try again !', 500));

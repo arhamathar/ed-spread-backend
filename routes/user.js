@@ -15,6 +15,10 @@ router.post(
     authController.signup
 );
 
+router.get('/test', (req, res, next) => {
+    res.json({ j: 'fjdkdasf;djsa;' });
+});
+
 router.post(
     '/login',
     [
@@ -23,4 +27,11 @@ router.post(
     ],
     authController.login
 );
+
+router.post(
+    '/forgotPassword',
+    [check('email').isEmail().normalizeEmail()],
+    authController.forgotPassword
+);
+
 module.exports = router;

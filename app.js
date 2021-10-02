@@ -14,13 +14,13 @@ app.use(express.json());
 
 app.use(morgan('dev'));
 
-app.use(ErrorMiddleware);
-
 app.use('/api/user', userRoutes);
 
 app.all('*', (req, res, next) => {
     next(new HttpError(`Can not find ${req.originalUrl} on this server`, 404));
 });
+
+app.use(ErrorMiddleware);
 
 app.listen(PORT, () => {
     console.log(`Server running at port ${PORT}`);
