@@ -16,10 +16,6 @@ app.use(morgan('dev'));
 
 app.use(ErrorMiddleware);
 
-app.use('/', (req, res) => {
-    res.json({ e: 'Working!!!!' });
-});
-
 app.use('/api/user', userRoutes);
 
 app.all('*', (req, res, next) => {
