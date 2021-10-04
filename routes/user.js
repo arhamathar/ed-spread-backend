@@ -15,10 +15,6 @@ router.post(
     authController.signup
 );
 
-router.get('/test', (req, res, next) => {
-    res.json({ j: 'fjdkdasf;djsa;' });
-});
-
 router.post(
     '/login',
     [

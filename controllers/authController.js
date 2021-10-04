@@ -22,6 +22,7 @@ exports.signup = async (req, res, next) => {
 
     try {
         const { name, email, password, mobile } = req.body;
+
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
@@ -41,7 +42,7 @@ exports.signup = async (req, res, next) => {
         const token = generateToken(newUser._id);
 
         res.status(201).json({
-            status: 'success',
+            message: 'Signup Successfully',
             user: { id: newUser._id, token },
         });
     } catch (e) {
@@ -80,7 +81,7 @@ exports.login = async (req, res, next) => {
         const token = generateToken(existingUser._id);
 
         res.status(200).json({
-            status: 'success',
+            message: 'Login Successfully',
             user: { id: existingUser._id, token },
         });
     } catch (e) {
@@ -116,7 +117,7 @@ exports.forgotPassword = async (req, res, next) => {
 
         await user.save();
 
-        res.status(200).json({ status: 'success' });
+        res.status(200).json({ message: 'Reset token sent to your email' });
     } catch (e) {
         next(
             new HttpError('Resetting passwrod failed, please try again !', 500)
@@ -149,7 +150,7 @@ exports.resetPassword = async (req, res, next) => {
         const token = generateToken(user._id);
 
         res.status(200).json({
-            status: 'success',
+            status: 'Password reset successfully!',
             user: { id: user._id, token },
         });
     } catch (e) {
