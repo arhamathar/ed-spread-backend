@@ -4,9 +4,14 @@ const { check } = require('express-validator');
 
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
-const { protect } = require('../middlewares/auth/protect');
+const { protect, restrictedTo } = require('../middlewares/auth/protect');
 
-router.get('/all-users', protect, userController.getAllUsers);
+router.get(
+    '/all-users',
+    protect,
+    restrictedTo('ADMIN, SUPER_USER'),
+    userController.getAllUsers
+);
 
 router.post(
     '/signup',
