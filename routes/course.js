@@ -1,5 +1,6 @@
 const express = require('express');
 const courseController = require('../controllers/courseController');
+const { check } = require('express-validator');
 
 const router = express.Router();
 
@@ -15,7 +16,8 @@ router.post(
     courseController.createCourse
 );
 router.get('/courses', courseController.getAllCourses);
-router.post(
+router.get('/bootcamp', courseController.getAllBootcamps);
+router.patch(
     '/update/:id',
     [
         check('title').notEmpty(),
