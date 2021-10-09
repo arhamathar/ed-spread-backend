@@ -3,6 +3,9 @@ const router = express.Router();
 const { check } = require('express-validator');
 
 const authController = require('../controllers/authController');
+const userController = require('../controllers/userController');
+
+router.get('/all-users', userController.getAllUsers);
 
 router.post(
     '/signup',
