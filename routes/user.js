@@ -4,8 +4,9 @@ const { check } = require('express-validator');
 
 const authController = require('../controllers/authController');
 const userController = require('../controllers/userController');
+const { protect } = require('../middlewares/auth/protect');
 
-router.get('/all-users', userController.getAllUsers);
+router.get('/all-users', protect, userController.getAllUsers);
 
 router.post(
     '/signup',
