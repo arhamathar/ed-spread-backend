@@ -1,12 +1,14 @@
-const Course = require('../models/course');
 const { validationResult } = require('express-validator');
+const User = require('../models/user');
+const Course = require('../models/course');
 const HttpError = require('../utils/httpError');
+const mongoose = require('mongoose');
 
 exports.createCourse = async (req, res, next) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
         return next(
-            new HttpError('Invalid credentials, check your credentials', 422)
+            new HttpError('Invalid values entered, enter data correctly', 422)
         );
     }
     try {
@@ -17,12 +19,17 @@ exports.createCourse = async (req, res, next) => {
             type,
             price,
             image,
+            user: mongoose.Types.ObjectId('6162f56d0d0e776f516e2a52'),
         });
-        course.save();
+        await course.save();
 
-        res.status(200).json({ status: 'success', course: course });
+        const user = await User.findById('6162f56d0d0e776f516e2a52');
+        user.courses.push(course);
+
+        await user.save();
+
+        res.status(200).json({ status: 'success', course });
     } catch (error) {
-        console.log(error);
         next(new HttpError('Course not created, please try again !', 500));
     }
 };
@@ -32,22 +39,20 @@ exports.getAllCourses = async (req, res, next) => {
     try {
         courses = await Course.find({ type: 'PAID' });
 
-        console.log('Hoe', courses);
         res.status(200).json({ status: 'success', courses });
     } catch (error) {
-        next(new HttpError('cannot get courses, please try again !', 500));
+        next(new HttpError('Cannot get courses, please try again !', 500));
     }
 };
 
 exports.getAllBootcamps = async (req, res, next) => {
-    let courses;
+    let bootcamps;
     try {
-        courses = await Course.find({ type: 'FREE' });
+        bootcamps = await Course.find({ type: 'FREE' });
 
-        console.log('Hoe', courses);
-        res.status(200).json({ status: 'success', courses });
+        res.status(200).json({ status: 'success', bootcamps });
     } catch (error) {
-        next(new HttpError('cannot get courses, please try again !', 500));
+        next(new HttpError('Cannot get bootcamps, please try again !', 500));
     }
 };
 
@@ -60,7 +65,6 @@ exports.updateCourse = async (req, res, next) => {
     }
     try {
         const { title, description, type, price, image } = req.body;
-        // const course = await Course.findById(req.params.id);
 
         const newCourse = await Course.updateOne(
             { _id: req.params.id },
@@ -74,8 +78,7 @@ exports.updateCourse = async (req, res, next) => {
         );
 
         res.status(200).json({ status: 'success', course: newCourse });
-    } catch (error) {
-        console.log(error);
+    } catch (e) {
         next(new HttpError('Course not updated, please try again !', 500));
     }
 };

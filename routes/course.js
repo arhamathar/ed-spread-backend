@@ -4,6 +4,10 @@ const { check } = require('express-validator');
 
 const router = express.Router();
 
+router.get('/courses', courseController.getAllCourses);
+
+router.get('/bootcamp', courseController.getAllBootcamps);
+
 router.post(
     '/create',
     [
@@ -15,8 +19,7 @@ router.post(
     ],
     courseController.createCourse
 );
-router.get('/courses', courseController.getAllCourses);
-router.get('/bootcamp', courseController.getAllBootcamps);
+
 router.patch(
     '/update/:id',
     [
@@ -28,6 +31,7 @@ router.patch(
     ],
     courseController.updateCourse
 );
+
 router.delete('/delete/:id', courseController.deleteCourse);
 
 module.exports = router;

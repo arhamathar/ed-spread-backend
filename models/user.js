@@ -28,6 +28,12 @@ const userSchema = new mongoose.Schema({
     },
     resetToken: { type: String },
     resetTokenExpires: { type: Date },
+    courses: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: 'Course',
+        },
+    ],
 });
 
 module.exports = mongoose.model('User', userSchema);

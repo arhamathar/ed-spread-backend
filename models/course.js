@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 
 const courseSchema = new mongoose.Schema({
     title: {
@@ -24,6 +23,7 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide an image'],
     },
+    user: { type: mongoose.Types.ObjectId, ref: 'User' },
 });
 
 module.exports = mongoose.model('Course', courseSchema);

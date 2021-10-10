@@ -8,8 +8,8 @@ const { protect, restrictedTo } = require('../middlewares/auth/protect');
 
 router.get(
     '/all-users',
-    protect,
-    restrictedTo('ADMIN, SUPER_USER'),
+    // protect,
+    // restrictedTo('ADMIN, SUPER_USER'),
     userController.getAllUsers
 );
 

@@ -7,19 +7,25 @@ exports.getAllUsers = async (req, res, next) => {
             {
                 $lookup: {
                     from: 'courses',
-                    localField: 'course',
+                    localField: 'courses',
                     foreignField: '_id',
                     as: 'courseInfo',
                 },
             },
-            { $unwind: { path: '$courseInfo' } },
+            {
+                $unwind: {
+                    path: '$courseInfo',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
             {
                 $project: {
                     name: 1,
                     mobile: 1,
                     email: 1,
-                    courseName: '$courseInfo.name',
-                    courseType: '$courseInfo.type',
+                    title: '$courseInfo.name',
+                    type: '$courseInfo.type',
+                    price: '$courseInfo.price',
                 },
             },
         ]);
