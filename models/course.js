@@ -23,6 +23,10 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide an image'],
     },
+    url: {
+        type: String,
+        required: [true, 'Please provide course url'],
+    },
     user: { type: mongoose.Types.ObjectId, ref: 'User' },
 });
 

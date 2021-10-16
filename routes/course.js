@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get('/courses', courseController.getAllCourses);
 
-router.get('/bootcamp', courseController.getAllBootcamps);
+router.get('/bootcamps', courseController.getAllBootcamps);
 
 router.post(
     '/create',

@@ -5,6 +5,7 @@ const HttpError = require('../utils/httpError');
 const mongoose = require('mongoose');
 
 exports.createCourse = async (req, res, next) => {
+    const { title, description, type, price, image } = req.body;
     const error = validationResult(req);
     if (!error.isEmpty()) {
         return next(
@@ -12,13 +13,13 @@ exports.createCourse = async (req, res, next) => {
         );
     }
     try {
-        const { title, description, type, price, image } = req.body;
         const course = await new Course({
             title,
             description,
             type,
             price,
             image,
+            url,
             user: mongoose.Types.ObjectId('6162f56d0d0e776f516e2a52'),
         });
         await course.save();
@@ -29,7 +30,8 @@ exports.createCourse = async (req, res, next) => {
         await user.save();
 
         res.status(200).json({ status: 'success', course });
-    } catch (error) {
+    } catch (e) {
+        console.log(e);
         next(new HttpError('Course not created, please try again !', 500));
     }
 };
@@ -60,7 +62,7 @@ exports.updateCourse = async (req, res, next) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
         return next(
-            new HttpError('Invalid credentials, check your credentials', 422)
+            new HttpError('Invalid data entered, please enter again', 422)
         );
     }
     try {
@@ -84,14 +86,18 @@ exports.updateCourse = async (req, res, next) => {
 };
 
 exports.deleteCourse = async (req, res, next) => {
+    console.log(req.params.id, '=========================');
     try {
         const course = await Course.findById(req.params.id);
-
+        console.log(course, req.params.id);
         await course.delete();
 
-        res.status(200).json({ status: 'success', course: course });
+        res.status(200).json({
+            status: 'success',
+            message: 'Course deleted successfully',
+        });
     } catch (error) {
         console.log(error);
-        next(new HttpError('Course not deleted, please try again !', 500));
+        next(new HttpError('Could not delete course, please try again !', 500));
     }
 };
