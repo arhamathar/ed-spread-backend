@@ -43,7 +43,7 @@ exports.signup = async (req, res, next) => {
 
         res.status(201).json({
             message: 'Signup Successfully',
-            user: { id: newUser._id, token },
+            user: { id: newUser._id, token, role: newUser.role },
         });
     } catch (e) {
         console.log(e);
@@ -82,7 +82,7 @@ exports.login = async (req, res, next) => {
 
         res.status(200).json({
             message: 'Login Successfully',
-            user: { id: existingUser._id, token },
+            user: { id: existingUser._id, token, role: existingUser.role },
         });
     } catch (e) {
         console.log(e);

@@ -13,8 +13,8 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user',
+        enum: ['USER', 'ADMIN', 'SUPER_USER'],
+        default: 'USER',
     },
     mobile: {
         type: String,
@@ -28,6 +28,12 @@ const userSchema = new mongoose.Schema({
     },
     resetToken: { type: String },
     resetTokenExpires: { type: Date },
+    courses: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: 'Course',
+        },
+    ],
 });
 
 module.exports = mongoose.model('User', userSchema);
