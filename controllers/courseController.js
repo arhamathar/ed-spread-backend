@@ -5,7 +5,7 @@ const HttpError = require('../utils/httpError');
 const mongoose = require('mongoose');
 
 exports.createCourse = async (req, res, next) => {
-    const { title, description, type, price, image } = req.body;
+    const { title, description, type, price, image, url } = req.body;
     const error = validationResult(req);
     if (!error.isEmpty()) {
         return next(
@@ -66,7 +66,7 @@ exports.updateCourse = async (req, res, next) => {
         );
     }
     try {
-        const { title, description, type, price, image } = req.body;
+        const { title, description, type, price, image, url } = req.body;
 
         const newCourse = await Course.updateOne(
             { _id: req.params.id },
@@ -76,20 +76,22 @@ exports.updateCourse = async (req, res, next) => {
                 type,
                 price,
                 image,
+                url,
             }
         );
 
-        res.status(200).json({ status: 'success', course: newCourse });
+        res.status(200).json({
+            status: 'success',
+            message: 'Course updated successfully',
+        });
     } catch (e) {
         next(new HttpError('Course not updated, please try again !', 500));
     }
 };
 
 exports.deleteCourse = async (req, res, next) => {
-    console.log(req.params.id, '=========================');
     try {
         const course = await Course.findById(req.params.id);
-        console.log(course, req.params.id);
         await course.delete();
 
         res.status(200).json({

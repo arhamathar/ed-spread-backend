@@ -16,6 +16,7 @@ router.post(
         check('type').notEmpty(),
         check('price').notEmpty(),
         check('image').notEmpty(),
+        check('url').notEmpty(),
     ],
     courseController.createCourse
 );
@@ -28,6 +29,7 @@ router.patch(
         check('type').notEmpty(),
         check('price').notEmpty(),
         check('image').notEmpty(),
+        check('url').notEmpty(),
     ],
     courseController.updateCourse
 );
