@@ -7,7 +7,7 @@ const connectDb = require('./utils/connectDb');
 const HttpError = require('./utils/httpError');
 const ErrorMiddleware = require('./middlewares/errors');
 const userRoutes = require('./routes/user');
-
+const paymentRoute = require('./routes/payments');
 const courseRoute = require('./routes/course.js');
 
 const app = express();
@@ -20,6 +20,7 @@ app.use(cors());
 
 app.use('/api/user', userRoutes);
 app.use('/api/course', courseRoute);
+app.use('/payment', paymentRoute);
 
 app.all('*', (req, res, next) => {
     next(new HttpError(`Can not find ${req.originalUrl} on this server`, 404));
