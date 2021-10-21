@@ -7,24 +7,30 @@ exports.getAllUsers = async (req, res, next) => {
             {
                 $lookup: {
                     from: 'courses',
-                    localField: 'course',
+                    localField: 'courses',
                     foreignField: '_id',
                     as: 'courseInfo',
                 },
             },
-            { $unwind: { path: '$courseInfo' } },
+            {
+                $unwind: {
+                    path: '$courseInfo',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
             {
                 $project: {
                     name: 1,
                     mobile: 1,
                     email: 1,
-                    courseName: '$courseInfo.name',
-                    courseType: '$courseInfo.type',
+                    title: '$courseInfo.title',
+                    type: '$courseInfo.type',
+                    price: '$courseInfo.price',
                 },
             },
         ]);
 
-        res.status(200).json({ users });
+        res.status(200).json({ status: 'Success', users });
     } catch (e) {
         next(new HttpError('Something went wrong, cannot find users!', 500));
     }
