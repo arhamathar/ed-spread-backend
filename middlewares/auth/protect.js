@@ -1,12 +1,11 @@
 const jwt = require('jsonwebtoken');
-const { promisify } = require('util');
+const User = require('../../models/user');
 const HttpError = require('../../utils/httpError');
 
 exports.protect = async (req, res, next) => {
     if (req.method === 'OPTIONS') {
         return next(); // to allow options request to continue.
     }
-
     let token;
     try {
         if (
@@ -25,7 +24,17 @@ exports.protect = async (req, res, next) => {
         }
 
         const decodedToken = await jwt.verify(token, process.env.JWT_SECRET);
-        req.user = { userId: decodedToken.userId };
+        const freshUser = await User.findById(decodedToken.id);
+
+        if (!freshUser) {
+            return next(
+                new HttpError(
+                    'The user belonging to this token no longer exists',
+                    401
+                )
+            );
+        }
+        req.user = freshUser;
 
         next();
     } catch (e) {
@@ -41,11 +50,10 @@ exports.protect = async (req, res, next) => {
 
 exports.restrictedTo = (...roles) => {
     return async (req, res, next) => {
-        if (!roles.includes(req.user.role));
-        {
+        if (roles.indexOf(req.user.role) === -1) {
             return next(
                 new HttpError(
-                    'You do not have permission to perform this action.',
+                    'You do not have permission to perform this action',
                     403
                 )
             );

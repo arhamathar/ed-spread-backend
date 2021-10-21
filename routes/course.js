@@ -1,6 +1,7 @@
 const express = require('express');
-const courseController = require('../controllers/courseController');
 const { check } = require('express-validator');
+const courseController = require('../controllers/courseController');
+const { protect, restrictedTo } = require('../middlewares/auth/protect');
 
 const router = express.Router();
 
@@ -18,6 +19,8 @@ router.post(
         check('image').notEmpty(),
         check('url').notEmpty(),
     ],
+    protect,
+    restrictedTo('ADMIN', 'SUPER_USER'),
     courseController.createCourse
 );
 
@@ -31,9 +34,16 @@ router.patch(
         check('image').notEmpty(),
         check('url').notEmpty(),
     ],
+    protect,
+    restrictedTo('ADMIN', 'SUPER_USER'),
     courseController.updateCourse
 );
 
-router.delete('/delete/:id', courseController.deleteCourse);
+router.delete(
+    '/delete/:id',
+    protect,
+    restrictedTo('ADMIN', 'SUPER_USER'),
+    courseController.deleteCourse
+);
 
 module.exports = router;
