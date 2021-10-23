@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
 
 const User = require('../models/user');
 const HttpError = require('../utils/httpError');
@@ -11,6 +13,14 @@ const generateToken = (id) =>
     jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN,
     });
+
+const transporter = nodemailer.createTransport(
+    sendgridTransport({
+        auth: {
+            api_key: process.env.SENDGRID_API,
+        },
+    })
+);
 
 exports.signup = async (req, res, next) => {
     const error = validationResult(req);
@@ -115,8 +125,17 @@ exports.forgotPassword = async (req, res, next) => {
         user.resetToken = hashedResetToken;
         user.resetTokenExpires = Date.now() + 10 * 60 * 1000;
 
-        await user.save();
-
+        user.save().then((result) => {
+            transporter.sendMail({
+                to: user.email,
+                from: 'samarimam78@gmail.com',
+                subject: 'password reset',
+                html: `
+                <p>You requested for password reset</p>
+                <h5>click in this <a href="http://localhost:3000/reset/${resetToken}">link</a> to reset password</h5>
+                `,
+            });
+        });
         res.status(200).json({ message: 'Reset token sent to your email' });
     } catch (e) {
         next(
@@ -132,10 +151,12 @@ exports.resetPassword = async (req, res, next) => {
     //     .digest('hex');
 
     try {
+        console.log(req.params.token);
         const user = await User.findOne({
             resetToken: req.params.token,
             resetTokenExpires: { $gt: Date.now() },
         });
+        console.log(user);
 
         if (!user) {
             return next(new HttpError('Token is invalid or expired !', 400));
