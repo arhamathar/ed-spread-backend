@@ -39,11 +39,19 @@ exports.signup = async (req, res, next) => {
             mobile,
             password: hashedPassword,
         });
+        console.log(newUser);
         const token = generateToken(newUser._id);
+        newUser.password = undefined;
+        const userInfo = {
+            id: newUser._id,
+            role: newUser.role,
+            mobile: newUser.mobile,
+            name: newUser.name,
+        };
 
         res.status(201).json({
             message: 'Signup Successfully',
-            user: { id: newUser._id, token, role: newUser.role },
+            user: { token, ...userInfo },
         });
     } catch (e) {
         console.log(e);
@@ -79,10 +87,18 @@ exports.login = async (req, res, next) => {
         }
 
         const token = generateToken(existingUser._id);
+        existingUser.password = undefined;
+        const userInfo = {
+            id: existingUser._id,
+            role: existingUser.role,
+            mobile: existingUser.mobile,
+            name: existingUser.name,
+            email: existingUser.email,
+        };
 
         res.status(200).json({
             message: 'Login Successfully',
-            user: { id: existingUser._id, token, role: existingUser.role },
+            user: { token, ...userInfo },
         });
     } catch (e) {
         console.log(e);

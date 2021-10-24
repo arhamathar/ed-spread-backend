@@ -20,7 +20,7 @@ app.use(cors());
 
 app.use('/api/user', userRoutes);
 app.use('/api/course', courseRoute);
-app.use('/payment', paymentRoute);
+app.use('/api/payment', paymentRoute);
 
 app.all('*', (req, res, next) => {
     next(new HttpError(`Can not find ${req.originalUrl} on this server`, 404));
