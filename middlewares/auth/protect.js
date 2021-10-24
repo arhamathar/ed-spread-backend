@@ -14,6 +14,7 @@ exports.protect = async (req, res, next) => {
         ) {
             token = req.headers.authorization.split(' ')[1];
         }
+
         if (!token) {
             return next(
                 new HttpError(
@@ -38,7 +39,6 @@ exports.protect = async (req, res, next) => {
 
         next();
     } catch (e) {
-        console.log(e);
         return next(
             new HttpError(
                 'You are not authorized to visit this route, please log in.',

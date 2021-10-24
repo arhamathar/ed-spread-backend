@@ -20,11 +20,11 @@ exports.createCourse = async (req, res, next) => {
             price,
             image,
             url,
-            user: mongoose.Types.ObjectId('6162f56d0d0e776f516e2a52'),
+            createdBy: req.user._id,
         });
         await course.save();
 
-        const user = await User.findById('6162f56d0d0e776f516e2a52');
+        const user = await User.findById(req.user._id);
         user.courses.push(course);
 
         await user.save();
@@ -40,7 +40,7 @@ exports.getAllCourses = async (req, res, next) => {
     let courses;
     try {
         courses = await Course.find({ type: 'PAID' });
-
+        console.log(req.user);
         res.status(200).json({ status: 'success', courses });
     } catch (error) {
         next(new HttpError('Cannot get courses, please try again !', 500));

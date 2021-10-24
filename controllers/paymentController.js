@@ -2,6 +2,8 @@ const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const Razorpay = require('razorpay');
 
+const User = require('../models/user');
+const Bill = require('../models/bills');
 const HttpError = require('../utils/httpError');
 
 exports.placeOrder = async (req, res, next) => {
@@ -38,16 +40,17 @@ exports.placeOrder = async (req, res, next) => {
 exports.successfulOrder = async (req, res, next) => {
     try {
         const {
+            amount,
+            receipt,
+            user,
+            course,
             orderCreationId,
             razorpayPaymentId,
             razorpayOrderId,
             razorpaySignature,
+            createdAt,
         } = req.body;
 
-        // const secret = '12345678';
-        // Creating our own digest
-        // The format should be like this:
-        // digest = hmac_sha256(orderCreationId + "|" + razorpayPaymentId, secret);
         const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET);
 
         shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
@@ -63,9 +66,28 @@ exports.successfulOrder = async (req, res, next) => {
                     400
                 )
             );
+        const newBill = await new Bill({
+            amount,
+            receipt,
+            user,
+            course,
+            orderCreationId,
+            razorpayPaymentId,
+            razorpayOrderId,
+            razorpaySignature,
+            createdAt,
+        });
+        await newBill.save();
 
-        // THE PAYMENT IS LEGIT & VERIFIED
-        // YOU CAN SAVE THE DETAILS IN YOUR DATABASE IF YOU WANT
+        const payingUser = await User.findById(req.user._id);
+        if (!payingUser) {
+            return next(
+                new HttpError('Please login to purchase the course', 401)
+            );
+        }
+        payingUser.courses.push(course);
+
+        await payingUser.save();
 
         res.status(200).json({
             status: 'success',

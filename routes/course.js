@@ -9,6 +9,8 @@ router.get('/courses', courseController.getAllCourses);
 
 router.get('/bootcamps', courseController.getAllBootcamps);
 
+router.use(protect);
+
 router.post(
     '/create',
     [
