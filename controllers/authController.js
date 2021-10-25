@@ -140,6 +140,7 @@ exports.forgotPassword = async (req, res, next) => {
             .digest('hex');
         user.resetToken = hashedResetToken;
         user.resetTokenExpires = Date.now() + 10 * 60 * 1000;
+        await user.save({ validateBeforeSave: false });
 
         user.save().then((result) => {
             transporter.sendMail({
