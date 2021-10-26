@@ -140,19 +140,29 @@ exports.forgotPassword = async (req, res, next) => {
             .digest('hex');
         user.resetToken = hashedResetToken;
         user.resetTokenExpires = Date.now() + 10 * 60 * 1000;
+
         await user.save({ validateBeforeSave: false });
 
-        user.save().then((result) => {
-            transporter.sendMail({
+        try {
+            await transporter.sendMail({
                 to: user.email,
-                from: 'samarimam78@gmail.com',
-                subject: 'password reset',
+                from: process.env.SENDGRID_SENDER_EMAIL,
+                subject: 'Reset Password link !',
                 html: `
-                <p>You requested for password reset</p>
-                <h5>click in this <a href="http://localhost:3000/reset/${resetToken}">link</a> to reset password</h5>
-                `,
+            <h4>You're almost ready to reset your password! </h4>
+            <p>Click on the link below to reset your password.</p>
+            <a href="http://localhost:3000/reset/${hashedResetToken}">Reset Password</a>
+            <p>Cheers,</p>
+            <h5>ED SPREAD</h5>
+            <p>If you don't forgot the password, please ignore this.</p>
+        `,
             });
-        });
+        } catch (err) {
+            return next(
+                new HttpError('Could not send reset link,please try again', 500)
+            );
+        }
+
         res.status(200).json({ message: 'Reset token sent to your email' });
     } catch (e) {
         next(
@@ -162,23 +172,17 @@ exports.forgotPassword = async (req, res, next) => {
 };
 
 exports.resetPassword = async (req, res, next) => {
-    // const hashedResetToken = crypto
-    //     .createHash('sha256')
-    //     .update(req.params.token)
-    //     .digest('hex');
-
     try {
-        console.log(req.params.token);
         const user = await User.findOne({
             resetToken: req.params.token,
             resetTokenExpires: { $gt: Date.now() },
         });
-        console.log(user);
 
         if (!user) {
             return next(new HttpError('Token is invalid or expired !', 400));
         }
-        const hashedNewPassword = await bcrypt.hash(req.body.password, 12);
+
+        const hashedNewPassword = await bcrypt.hash(req.body.resetPassword, 12);
 
         user.password = hashedNewPassword;
         user.resetToken = undefined;
@@ -188,10 +192,12 @@ exports.resetPassword = async (req, res, next) => {
         const token = generateToken(user._id);
 
         res.status(200).json({
-            status: 'Password reset successfully!',
+            status: 'success',
+            message: 'Password reset successfully!',
             user: { id: user._id, token },
         });
     } catch (e) {
+        console.log(e);
         next(
             new HttpError('Resetting password failed, please try again !', 500)
         );
