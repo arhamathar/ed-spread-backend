@@ -49,7 +49,7 @@ exports.signup = async (req, res, next) => {
             mobile,
             password: hashedPassword,
         });
-        console.log(newUser);
+
         const token = generateToken(newUser._id);
         newUser.password = undefined;
         const userInfo = {
@@ -151,7 +151,7 @@ exports.forgotPassword = async (req, res, next) => {
                 html: `
             <h4>You're almost ready to reset your password! </h4>
             <p>Click on the link below to reset your password.</p>
-            <a href="http://localhost:3000/reset/${hashedResetToken}">Reset Password</a>
+            <a href=${process.env.FRONTEND_URL_PROD}/reset/${hashedResetToken}>Reset Password</a>
             <p>Cheers,</p>
             <h5>ED SPREAD</h5>
             <p>If you don't forgot the password, please ignore this.</p>
@@ -183,7 +183,6 @@ exports.resetPassword = async (req, res, next) => {
         }
 
         const hashedNewPassword = await bcrypt.hash(req.body.resetPassword, 12);
-
         user.password = hashedNewPassword;
         user.resetToken = undefined;
         user.resetTokenExpires = undefined;
