@@ -112,7 +112,7 @@ exports.login = async (req, res, next) => {
         });
     } catch (e) {
         console.log(e);
-        next(new HttpError('Signed Up failed, please try again !', 500));
+        next(new HttpError('Loggin In failed, please try again !', 500));
     }
 };
 
