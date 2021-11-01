@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 
 const connectDb = () => {
+    console.log(process.env.MONGO_PASSWORD);
     mongoose
         .connect(
             process.env.MONGODB_URL.replace(
-                '<PASSWORD>',
+                '<password>',
                 process.env.MONGO_PASSWORD
             )
         )
@@ -12,6 +13,7 @@ const connectDb = () => {
             console.log('Databse connected Successfully!');
         })
         .catch((e) => {
+            console.log(e);
             console.log('Databse connection failed!');
         });
 };
