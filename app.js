@@ -41,3 +41,5 @@ app.listen(PORT, () => {
     console.log(`Server running at port ${PORT}`);
     connectDb();
 });
+
+// sendgrid config vars added
