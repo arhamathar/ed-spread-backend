@@ -158,6 +158,7 @@ exports.forgotPassword = async (req, res, next) => {
         `,
             });
         } catch (err) {
+            console.log(err, 'reset token error');
             return next(
                 new HttpError('Could not send reset link,please try again', 500)
             );
