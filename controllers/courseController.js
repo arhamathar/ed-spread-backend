@@ -58,6 +58,39 @@ exports.getAllBootcamps = async (req, res, next) => {
     }
 };
 
+exports.getMyCourses = async (req, res, next) => {
+    let courses;
+    const userId = req.params.userId;
+    try {
+        courses = await User.aggregate([
+            { $match: { _id: userId } },
+            { $unwind: { path: '$courses'} },
+            { 
+                $lookup: {
+                    from: 'courses',
+                    localField: 'courses',
+                    foreignField: '_id',
+                    as: 'courseInfo',
+                },
+            },
+            {
+                $project: {
+                    title: '$courseInfo.title',
+                    description: 'courseInfo.description',
+                    type: '$courseInfo.type',
+                    price: '$courseInfo.price',
+                    image: '$courseInfo.image',
+                    url: '$courseInfo.url'
+                }
+            }
+        ]);
+
+        res.status(200).json({status: 'success', courses})
+    } catch (e) {
+        next(new HttpError('Something went wrong, cannot get courses!', 500));
+    }
+}
+
 exports.updateCourse = async (req, res, next) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
