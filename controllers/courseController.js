@@ -63,9 +63,9 @@ exports.getMyCourses = async (req, res, next) => {
     const userId = req.params.userId;
     try {
         courses = await User.aggregate([
-            { $match: { _id: userId } },
-            { $unwind: { path: '$courses'} },
-            { 
+            { $match: { _id: mongoose.Types.ObjectId(userId) } },
+            { $unwind: { path: '$courses' } },
+            {
                 $lookup: {
                     from: 'courses',
                     localField: 'courses',
@@ -73,6 +73,7 @@ exports.getMyCourses = async (req, res, next) => {
                     as: 'courseInfo',
                 },
             },
+            { $unwind: '$courseInfo' },
             {
                 $project: {
                     title: '$courseInfo.title',
@@ -80,16 +81,19 @@ exports.getMyCourses = async (req, res, next) => {
                     type: '$courseInfo.type',
                     price: '$courseInfo.price',
                     image: '$courseInfo.image',
-                    url: '$courseInfo.url'
-                }
-            }
+                    url: '$courseInfo.url',
+                },
+            },
         ]);
 
-        res.status(200).json({status: 'success', courses})
+        console.log(courses);
+
+        res.status(200).json({ status: 'success', courses });
     } catch (e) {
+        console.log(e);
         next(new HttpError('Something went wrong, cannot get courses!', 500));
     }
-}
+};
 
 exports.updateCourse = async (req, res, next) => {
     const error = validationResult(req);
