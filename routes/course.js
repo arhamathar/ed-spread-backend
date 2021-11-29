@@ -9,7 +9,10 @@ router.get('/courses', courseController.getAllCourses);
 
 router.get('/bootcamps', courseController.getAllBootcamps);
 
+
 router.use(protect);
+
+router.get('/my-course/:userId', courseController.getMyCourses);
 
 router.post(
     '/create',
