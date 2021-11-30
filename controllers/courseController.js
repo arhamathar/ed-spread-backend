@@ -40,7 +40,6 @@ exports.getAllCourses = async (req, res, next) => {
     let courses;
     try {
         courses = await Course.find({ type: 'PAID' });
-        console.log(req.user);
         res.status(200).json({ status: 'success', courses });
     } catch (error) {
         next(new HttpError('Cannot get courses, please try again !', 500));
@@ -77,7 +76,7 @@ exports.getMyCourses = async (req, res, next) => {
             {
                 $project: {
                     title: '$courseInfo.title',
-                    description: 'courseInfo.description',
+                    description: '$courseInfo.description',
                     type: '$courseInfo.type',
                     price: '$courseInfo.price',
                     image: '$courseInfo.image',
@@ -85,8 +84,6 @@ exports.getMyCourses = async (req, res, next) => {
                 },
             },
         ]);
-
-        console.log(courses);
 
         res.status(200).json({ status: 'success', courses });
     } catch (e) {
