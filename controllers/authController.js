@@ -65,6 +65,7 @@ exports.signup = async (req, res, next) => {
             role: newUser.role,
             mobile: newUser.mobile,
             name: newUser.name,
+            email: newUser.email,
             referralCode: newUser.referralCode,
             referralPoints: newUser.referralPoints,
         };
