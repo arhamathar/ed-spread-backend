@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema({
         minlength: 6,
         select: false,
     },
+    referralCode: { type: String },
+    referralPoints: { type: Number, default: 0 },
     resetToken: { type: String },
     resetTokenExpires: { type: Date },
     courses: [

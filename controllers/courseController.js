@@ -73,6 +73,7 @@ exports.getMyCourses = async (req, res, next) => {
                 },
             },
             { $unwind: '$courseInfo' },
+            { $match: { 'courseInfo.type': 'PAID' } },
             {
                 $project: {
                     title: '$courseInfo.title',
