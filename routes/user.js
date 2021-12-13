@@ -14,6 +14,14 @@ router.get(
 );
 
 router.post(
+    '/editPoints',
+    protect,
+    restrictedTo('ADMIN', 'SUPER_USER'),
+    [check('email').isEmail().normalizeEmail()],
+    userController.subtractReferralPoints
+);
+
+router.post(
     '/signup',
     [
         check('email').isEmail().normalizeEmail(),

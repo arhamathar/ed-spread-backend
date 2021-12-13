@@ -4,6 +4,7 @@ const Razorpay = require('razorpay');
 
 const User = require('../models/user');
 const Bill = require('../models/bills');
+const Course = require('../models/course');
 const HttpError = require('../utils/httpError');
 
 exports.placeOrder = async (req, res, next) => {
@@ -13,7 +14,19 @@ exports.placeOrder = async (req, res, next) => {
             key_secret: process.env.RAZORPAY_SECRET,
         });
 
-        const { amount } = req.body;
+        const { amount, courseId } = req.body;
+
+        const course = await Course.findById(courseId);
+
+        if (course.price !== amount) {
+            return next(
+                new HttpError(
+                    'Transaction not legit!, please try again later',
+                    500
+                )
+            );
+        }
+
         const options = {
             amount: amount * 100, // amount in smallest currency unit
             currency: 'INR',
@@ -49,6 +62,7 @@ exports.successfulOrder = async (req, res, next) => {
             razorpayOrderId,
             razorpaySignature,
             createdAt,
+            referralCode,
         } = req.body;
 
         const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET);
@@ -59,13 +73,15 @@ exports.successfulOrder = async (req, res, next) => {
         const digest = shasum.digest('hex');
 
         // comaparing our digest with the actual signature
-        if (digest !== razorpaySignature)
+        if (digest !== razorpaySignature) {
             return next(
                 new HttpError(
                     'Transaction not legit!, please try again later',
                     400
                 )
             );
+        }
+
         const newBill = await new Bill({
             amount,
             receipt,
@@ -85,7 +101,31 @@ exports.successfulOrder = async (req, res, next) => {
                 new HttpError('Please login to purchase the course', 401)
             );
         }
+
+        if (payingUser.referralCode === referralCode) {
+            return next(
+                new HttpError(
+                    'You can not use your own code to purchase courses',
+                    500
+                )
+            );
+        }
+
         payingUser.courses.push(course);
+
+        const referralUser = await User.findOne({ referralCode });
+        if (referralUser) {
+            await User.updateOne(
+                { _id: referralUser._id },
+                {
+                    referralPoints: referralUser.referralPoints + 100,
+                }
+            );
+        }
+
+        if (!referralUser && referralCode !== '') {
+            return next(new HttpError('Referral Code not correct', 400));
+        }
 
         await payingUser.save();
 
