@@ -43,3 +43,4 @@ app.listen(PORT, () => {
 });
 
 // sendgrid config vars added
+// config vars updated for heroku
