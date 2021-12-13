@@ -42,5 +42,5 @@ app.listen(PORT, () => {
     connectDb();
 });
 
-// sendgrid config vars added
 // config vars updated for heroku
+// mongodb config vars added
