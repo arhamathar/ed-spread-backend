@@ -7,17 +7,22 @@ const Bill = require('../models/bills');
 const Course = require('../models/course');
 const HttpError = require('../utils/httpError');
 
+const debug = (n) => {
+    console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-', n);
+};
+
 exports.placeOrder = async (req, res, next) => {
     try {
         const instance = new Razorpay({
             key_id: process.env.RAZORPAY_KEY_ID,
             key_secret: process.env.RAZORPAY_SECRET,
         });
+        debug(1);
 
         const { amount, courseId } = req.body;
 
         const course = await Course.findById(courseId);
-
+        debug(2);
         if (course.price !== amount) {
             return next(
                 new HttpError(
@@ -26,6 +31,7 @@ exports.placeOrder = async (req, res, next) => {
                 )
             );
         }
+        debug(3);
 
         const options = {
             amount: amount * 100, // amount in smallest currency unit
@@ -34,6 +40,7 @@ exports.placeOrder = async (req, res, next) => {
         };
 
         const order = await instance.orders.create(options);
+        debug(4);
 
         if (!order)
             return next(
@@ -42,10 +49,11 @@ exports.placeOrder = async (req, res, next) => {
                     500
                 )
             );
+        debug(5);
 
         res.status(200).json({ status: 'success', order });
     } catch (e) {
-        console.log(e);
+        console.log(e, '==============================');
         next(new HttpError('Something went wrong, could not place order', 500));
     }
 };
