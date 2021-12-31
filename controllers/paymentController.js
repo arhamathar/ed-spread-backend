@@ -93,20 +93,10 @@ exports.successfulOrder = async (req, res, next) => {
         } = req.body;
         debug(6);
         const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET);
-<<<<<<< HEAD
-        debug(7);
-
-=======
->>>>>>> 37eb26b05e380772b19e0611549ff775b245c6c4
         shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
         debug(8);
         // shasum.update(JSON.stringify(req.body));
         const digest = shasum.digest('hex');
-<<<<<<< HEAD
-        debug(9);
-
-=======
->>>>>>> 37eb26b05e380772b19e0611549ff775b245c6c4
         // comaparing our digest with the actual signature
         if (digest !== razorpaySignature) {
             debug(555);
@@ -142,19 +132,6 @@ exports.successfulOrder = async (req, res, next) => {
         }
         debug(12);
 
-<<<<<<< HEAD
-        if (payingUser.referralCode === referralCode) {
-            return next(
-                new HttpError(
-                    'You can not use your own code to purchase courses',
-                    500
-                )
-            );
-        }
-        debug(13);
-
-=======
->>>>>>> 37eb26b05e380772b19e0611549ff775b245c6c4
         payingUser.courses.push(course);
         debug(14);
         const referralUser = await User.findOne({ referralCode });
@@ -169,14 +146,6 @@ exports.successfulOrder = async (req, res, next) => {
         }
         debug(14);
 
-<<<<<<< HEAD
-        if (!referralUser && referralCode !== '') {
-            return next(new HttpError('Referral Code not correct', 400));
-        }
-        debug(15);
-
-=======
->>>>>>> 37eb26b05e380772b19e0611549ff775b245c6c4
         await payingUser.save();
         debug(16);
 

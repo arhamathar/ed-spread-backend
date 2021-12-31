@@ -78,7 +78,7 @@ exports.subtractReferralPoints = async (req, res, next) => {
     }
 };
 
-exports.getAllUsers = async (req, res, next) => {
+exports.getUser = async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id);
         res.status(200).json({ status: 'Success', user });
