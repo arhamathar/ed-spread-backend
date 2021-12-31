@@ -5,9 +5,11 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
 const sendgridTransport = require('nodemailer-sendgrid-transport');
+const referralCodeGenerator = require('referral-code-generator');
 
 const User = require('../models/user');
 const HttpError = require('../utils/httpError');
+const user = require('../models/user');
 
 const generateToken = (id) =>
     jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -42,12 +44,18 @@ exports.signup = async (req, res, next) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 12);
+        const referralCode = referralCodeGenerator.alphaNumeric(
+            'uppercase',
+            6,
+            3
+        );
 
         const newUser = await User.create({
             name,
             email,
             mobile,
             password: hashedPassword,
+            referralCode,
         });
 
         const token = generateToken(newUser._id);
@@ -57,6 +65,9 @@ exports.signup = async (req, res, next) => {
             role: newUser.role,
             mobile: newUser.mobile,
             name: newUser.name,
+            email: newUser.email,
+            referralCode: newUser.referralCode,
+            referralPoints: newUser.referralPoints,
         };
 
         res.status(201).json({
@@ -98,12 +109,15 @@ exports.login = async (req, res, next) => {
 
         const token = generateToken(existingUser._id);
         existingUser.password = undefined;
+
         const userInfo = {
             id: existingUser._id,
             role: existingUser.role,
             mobile: existingUser.mobile,
             name: existingUser.name,
             email: existingUser.email,
+            referralCode: existingUser.referralCode,
+            referralPoints: existingUser.referralPoints,
         };
 
         res.status(200).json({
@@ -112,7 +126,7 @@ exports.login = async (req, res, next) => {
         });
     } catch (e) {
         console.log(e);
-        next(new HttpError('Signed Up failed, please try again !', 500));
+        next(new HttpError('Loggin In failed, please try again !', 500));
     }
 };
 

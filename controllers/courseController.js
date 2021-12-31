@@ -40,7 +40,6 @@ exports.getAllCourses = async (req, res, next) => {
     let courses;
     try {
         courses = await Course.find({ type: 'PAID' });
-        console.log(req.user);
         res.status(200).json({ status: 'success', courses });
     } catch (error) {
         next(new HttpError('Cannot get courses, please try again !', 500));
@@ -55,6 +54,42 @@ exports.getAllBootcamps = async (req, res, next) => {
         res.status(200).json({ status: 'success', bootcamps });
     } catch (error) {
         next(new HttpError('Cannot get bootcamps, please try again !', 500));
+    }
+};
+
+exports.getMyCourses = async (req, res, next) => {
+    let courses;
+    const userId = req.params.userId;
+    try {
+        courses = await User.aggregate([
+            { $match: { _id: mongoose.Types.ObjectId(userId) } },
+            { $unwind: { path: '$courses' } },
+            {
+                $lookup: {
+                    from: 'courses',
+                    localField: 'courses',
+                    foreignField: '_id',
+                    as: 'courseInfo',
+                },
+            },
+            { $unwind: '$courseInfo' },
+            { $match: { 'courseInfo.type': 'PAID' } },
+            {
+                $project: {
+                    title: '$courseInfo.title',
+                    description: '$courseInfo.description',
+                    type: '$courseInfo.type',
+                    price: '$courseInfo.price',
+                    image: '$courseInfo.image',
+                    url: '$courseInfo.url',
+                },
+            },
+        ]);
+
+        res.status(200).json({ status: 'success', courses });
+    } catch (e) {
+        console.log(e);
+        next(new HttpError('Something went wrong, cannot get courses!', 500));
     }
 };
 

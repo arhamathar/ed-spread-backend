@@ -41,3 +41,6 @@ app.listen(PORT, () => {
     console.log(`Server running at port ${PORT}`);
     connectDb();
 });
+
+// config vars updated for heroku
+// mongodb config vars added
