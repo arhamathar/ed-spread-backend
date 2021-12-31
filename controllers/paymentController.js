@@ -13,6 +13,7 @@ const debug = (n) => {
 
 exports.placeOrder = async (req, res, next) => {
     try {
+        console.log(process.env.RAZORPAY_KEY_ID);
         const instance = new Razorpay({
             key_id: process.env.RAZORPAY_KEY_ID,
             key_secret: process.env.RAZORPAY_SECRET,
@@ -72,13 +73,16 @@ exports.successfulOrder = async (req, res, next) => {
             createdAt,
             referralCode,
         } = req.body;
-
+        debug(6);
         const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET);
+        debug(7);
 
         shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
+        debug(8);
         // shasum.update(JSON.stringify(req.body));
 
         const digest = shasum.digest('hex');
+        debug(9);
 
         // comaparing our digest with the actual signature
         if (digest !== razorpaySignature) {
@@ -89,6 +93,7 @@ exports.successfulOrder = async (req, res, next) => {
                 )
             );
         }
+        debug(10);
 
         const newBill = await new Bill({
             amount,
@@ -102,6 +107,7 @@ exports.successfulOrder = async (req, res, next) => {
             createdAt,
         });
         await newBill.save();
+        debug(11);
 
         const payingUser = await User.findById(req.user._id);
         if (!payingUser) {
@@ -109,6 +115,7 @@ exports.successfulOrder = async (req, res, next) => {
                 new HttpError('Please login to purchase the course', 401)
             );
         }
+        debug(12);
 
         if (payingUser.referralCode === referralCode) {
             return next(
@@ -118,9 +125,10 @@ exports.successfulOrder = async (req, res, next) => {
                 )
             );
         }
+        debug(13);
 
         payingUser.courses.push(course);
-
+        debug(14);
         const referralUser = await User.findOne({ referralCode });
         if (referralUser) {
             await User.updateOne(
@@ -130,19 +138,24 @@ exports.successfulOrder = async (req, res, next) => {
                 }
             );
         }
+        debug(14);
 
         if (!referralUser && referralCode !== '') {
             return next(new HttpError('Referral Code not correct', 400));
         }
+        debug(15);
 
         await payingUser.save();
+        debug(16);
 
         res.status(200).json({
             status: 'success',
             message: 'Payment successful',
         });
+        debug(17);
     } catch (e) {
         console.log(e);
         next(new HttpError('Transaction failed, please try again later', 500));
     }
+    debug(18);
 };
