@@ -17,12 +17,11 @@ exports.placeOrder = async (req, res, next) => {
             key_id: process.env.RAZORPAY_KEY_ID,
             key_secret: process.env.RAZORPAY_SECRET,
         });
-        debug(1);
 
-        const { amount, courseId } = req.body;
+        const { amount, courseId, referralCode } = req.body;
 
         const course = await Course.findById(courseId);
-        debug(2);
+
         if (course.price !== amount) {
             return next(
                 new HttpError(
@@ -31,7 +30,27 @@ exports.placeOrder = async (req, res, next) => {
                 )
             );
         }
-        debug(3);
+
+        const payingUser = await User.findById(req.user._id);
+        if (!payingUser) {
+            return next(
+                new HttpError('Please login to purchase the course', 401)
+            );
+        }
+
+        if (payingUser.referralCode === referralCode) {
+            return next(
+                new HttpError(
+                    'You can not use your own code to purchase courses',
+                    500
+                )
+            );
+        }
+
+        const referralUser = await User.findOne({ referralCode });
+        if (!referralUser && referralCode !== '') {
+            return next(new HttpError('Referral Code not correct', 400));
+        }
 
         const options = {
             amount: amount * 100, // amount in smallest currency unit
@@ -49,7 +68,6 @@ exports.placeOrder = async (req, res, next) => {
                     500
                 )
             );
-        debug(5);
 
         res.status(200).json({ status: 'success', order });
     } catch (e) {
@@ -59,7 +77,6 @@ exports.placeOrder = async (req, res, next) => {
 };
 
 exports.successfulOrder = async (req, res, next) => {
-    debug(6);
     try {
         const {
             amount,
@@ -73,14 +90,11 @@ exports.successfulOrder = async (req, res, next) => {
             createdAt,
             referralCode,
         } = req.body;
-        debug(7);
+
         const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET);
-        debug(8);
         shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
         // shasum.update(JSON.stringify(req.body));
-        debug(9);
         const digest = shasum.digest('hex');
-        debug(10);
         // comaparing our digest with the actual signature
         if (digest !== razorpaySignature) {
             debug(555);
@@ -91,7 +105,6 @@ exports.successfulOrder = async (req, res, next) => {
                 )
             );
         }
-        debug(11);
 
         const newBill = await new Bill({
             amount,
@@ -104,34 +117,20 @@ exports.successfulOrder = async (req, res, next) => {
             razorpaySignature,
             createdAt,
         });
-        debug(12);
+
         await newBill.save();
-        debug(13);
 
         const payingUser = await User.findById(req.user._id);
-        debug(14);
         if (!payingUser) {
             return next(
                 new HttpError('Please login to purchase the course', 401)
             );
         }
-        debug(15);
-
-        if (payingUser.referralCode === referralCode) {
-            return next(
-                new HttpError(
-                    'You can not use your own code to purchase courses',
-                    500
-                )
-            );
-        }
-        debug(16);
 
         payingUser.courses.push(course);
-        debug(17);
 
         const referralUser = await User.findOne({ referralCode });
-        debug(18);
+
         if (referralUser) {
             await User.updateOne(
                 { _id: referralUser._id },
@@ -140,13 +139,8 @@ exports.successfulOrder = async (req, res, next) => {
                 }
             );
         }
-        debug(19);
-        if (!referralUser && referralCode !== '') {
-            return next(new HttpError('Referral Code not correct', 400));
-        }
 
         await payingUser.save();
-        debug(20);
 
         res.status(200).json({
             status: 'success',
