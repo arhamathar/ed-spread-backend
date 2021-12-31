@@ -13,6 +13,8 @@ router.get(
     userController.getAllUsers
 );
 
+router.get('/user/:id', protect, userController.getUser);
+
 router.post(
     '/editPoints',
     protect,
