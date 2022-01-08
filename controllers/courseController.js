@@ -76,6 +76,7 @@ exports.getMyCourses = async (req, res, next) => {
             { $match: { 'courseInfo.type': 'PAID' } },
             {
                 $project: {
+                    _id: '$courseInfo._id',
                     title: '$courseInfo.title',
                     description: '$courseInfo.description',
                     type: '$courseInfo.type',
