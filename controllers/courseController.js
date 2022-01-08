@@ -138,3 +138,18 @@ exports.deleteCourse = async (req, res, next) => {
         next(new HttpError('Could not delete course, please try again !', 500));
     }
 };
+
+exports.getViewCourse = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Course fetched successfully',
+            course,
+        });
+    } catch (e) {
+        console.log(e);
+        next(new HttpError('Something went wrong, please try again!', 500));
+    }
+};
