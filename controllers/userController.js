@@ -19,6 +19,7 @@ exports.getAllUsers = async (req, res, next) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
+            { $match: { 'courseInfo.type': 'PAID' } },
             {
                 $project: {
                     name: 1,
