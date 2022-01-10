@@ -5,7 +5,8 @@ const HttpError = require('../utils/httpError');
 const mongoose = require('mongoose');
 
 exports.createCourse = async (req, res, next) => {
-    const { title, description, type, price, image, url } = req.body;
+    const { title, description, type, price, image, url, notesPdf, videoUrls } =
+        req.body;
     const error = validationResult(req);
     if (!error.isEmpty()) {
         return next(
@@ -20,6 +21,8 @@ exports.createCourse = async (req, res, next) => {
             price,
             image,
             url,
+            notesPdf,
+            videoUrls,
             createdBy: req.user._id,
         });
         await course.save();
@@ -102,7 +105,16 @@ exports.updateCourse = async (req, res, next) => {
         );
     }
     try {
-        const { title, description, type, price, image, url } = req.body;
+        const {
+            title,
+            description,
+            type,
+            price,
+            image,
+            url,
+            notesPdf,
+            videoUrls,
+        } = req.body;
 
         const newCourse = await Course.updateOne(
             { _id: req.params.id },
@@ -113,6 +125,8 @@ exports.updateCourse = async (req, res, next) => {
                 price,
                 image,
                 url,
+                notesPdf,
+                videoUrls,
             }
         );
 
