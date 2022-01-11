@@ -118,6 +118,7 @@ exports.login = async (req, res, next) => {
             email: existingUser.email,
             referralCode: existingUser.referralCode,
             referralPoints: existingUser.referralPoints,
+            courses: existingUser.courses,
         };
 
         res.status(200).json({
