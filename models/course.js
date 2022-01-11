@@ -25,8 +25,18 @@ const courseSchema = new mongoose.Schema({
     },
     url: {
         type: String,
-        required: [true, 'Please provide course url'],
     },
+    notesPdf: {
+        type: String,
+    },
+    videoUrls: [
+        {
+            url: String,
+            $key: Number,
+            serialNo: Number,
+            videoTitle: String,
+        },
+    ],
     createdBy: { type: mongoose.Types.ObjectId, ref: 'User' },
 });
 

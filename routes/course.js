@@ -11,6 +11,10 @@ router.get('/bootcamps', courseController.getAllBootcamps);
 
 router.use(protect);
 
+router.get('/my-course/:userId', courseController.getMyCourses);
+
+router.get('/:courseId', courseController.getViewCourse);
+
 router.post(
     '/create',
     [
@@ -19,7 +23,6 @@ router.post(
         check('type').notEmpty(),
         check('price').notEmpty(),
         check('image').notEmpty(),
-        check('url').notEmpty(),
     ],
     protect,
     restrictedTo('ADMIN', 'SUPER_USER'),
@@ -34,7 +37,6 @@ router.patch(
         check('type').notEmpty(),
         check('price').notEmpty(),
         check('image').notEmpty(),
-        check('url').notEmpty(),
     ],
     protect,
     restrictedTo('ADMIN', 'SUPER_USER'),

@@ -10,7 +10,15 @@ router.get(
     '/all-users',
     protect,
     restrictedTo('ADMIN', 'SUPER_USER'),
-    userController.getAllUsers
+    userController.getAllUsersByBills
+);
+
+router.post(
+    '/editPoints',
+    protect,
+    restrictedTo('ADMIN', 'SUPER_USER'),
+    [check('email').isEmail().normalizeEmail()],
+    userController.subtractReferralPoints
 );
 
 router.post(

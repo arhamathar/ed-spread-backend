@@ -5,7 +5,8 @@ const HttpError = require('../utils/httpError');
 const mongoose = require('mongoose');
 
 exports.createCourse = async (req, res, next) => {
-    const { title, description, type, price, image, url } = req.body;
+    const { title, description, type, price, image, url, notesPdf, videoUrls } =
+        req.body;
     const error = validationResult(req);
     if (!error.isEmpty()) {
         return next(
@@ -20,6 +21,8 @@ exports.createCourse = async (req, res, next) => {
             price,
             image,
             url,
+            notesPdf,
+            videoUrls,
             createdBy: req.user._id,
         });
         await course.save();
@@ -40,7 +43,6 @@ exports.getAllCourses = async (req, res, next) => {
     let courses;
     try {
         courses = await Course.find({ type: 'PAID' });
-        console.log(req.user);
         res.status(200).json({ status: 'success', courses });
     } catch (error) {
         next(new HttpError('Cannot get courses, please try again !', 500));
@@ -58,6 +60,43 @@ exports.getAllBootcamps = async (req, res, next) => {
     }
 };
 
+exports.getMyCourses = async (req, res, next) => {
+    let courses;
+    const userId = req.params.userId;
+    try {
+        courses = await User.aggregate([
+            { $match: { _id: mongoose.Types.ObjectId(userId) } },
+            { $unwind: { path: '$courses' } },
+            {
+                $lookup: {
+                    from: 'courses',
+                    localField: 'courses',
+                    foreignField: '_id',
+                    as: 'courseInfo',
+                },
+            },
+            { $unwind: '$courseInfo' },
+            { $match: { 'courseInfo.type': 'PAID' } },
+            {
+                $project: {
+                    _id: '$courseInfo._id',
+                    title: '$courseInfo.title',
+                    description: '$courseInfo.description',
+                    type: '$courseInfo.type',
+                    price: '$courseInfo.price',
+                    image: '$courseInfo.image',
+                    url: '$courseInfo.url',
+                },
+            },
+        ]);
+
+        res.status(200).json({ status: 'success', courses });
+    } catch (e) {
+        console.log(e);
+        next(new HttpError('Something went wrong, cannot get courses!', 500));
+    }
+};
+
 exports.updateCourse = async (req, res, next) => {
     const error = validationResult(req);
     if (!error.isEmpty()) {
@@ -66,7 +105,16 @@ exports.updateCourse = async (req, res, next) => {
         );
     }
     try {
-        const { title, description, type, price, image, url } = req.body;
+        const {
+            title,
+            description,
+            type,
+            price,
+            image,
+            url,
+            notesPdf,
+            videoUrls,
+        } = req.body;
 
         const newCourse = await Course.updateOne(
             { _id: req.params.id },
@@ -77,6 +125,8 @@ exports.updateCourse = async (req, res, next) => {
                 price,
                 image,
                 url,
+                notesPdf,
+                videoUrls,
             }
         );
 
@@ -101,5 +151,20 @@ exports.deleteCourse = async (req, res, next) => {
     } catch (error) {
         console.log(error);
         next(new HttpError('Could not delete course, please try again !', 500));
+    }
+};
+
+exports.getViewCourse = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId);
+
+        res.status(200).json({
+            status: 'success',
+            message: 'Course fetched successfully',
+            course,
+        });
+    } catch (e) {
+        console.log(e);
+        next(new HttpError('Something went wrong, please try again!', 500));
     }
 };

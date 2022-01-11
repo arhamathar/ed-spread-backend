@@ -4,7 +4,7 @@ const connectDb = () => {
     mongoose
         .connect(
             process.env.MONGODB_URL.replace(
-                '<PASSWORD>',
+                '<password>',
                 process.env.MONGO_PASSWORD
             )
         )
