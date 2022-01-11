@@ -1,6 +1,8 @@
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const Razorpay = require('razorpay');
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
 
 const User = require('../models/user');
 const Bill = require('../models/bills');
@@ -10,6 +12,14 @@ const HttpError = require('../utils/httpError');
 const debug = (n) => {
     console.log('=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-', n);
 };
+
+const transporter = nodemailer.createTransport(
+    sendgridTransport({
+        auth: {
+            api_key: process.env.SENDGRID_API,
+        },
+    })
+);
 
 exports.placeOrder = async (req, res, next) => {
     try {
@@ -141,6 +151,39 @@ exports.successfulOrder = async (req, res, next) => {
         }
 
         await payingUser.save();
+
+        try {
+            await transporter.sendMail({
+                to: payingUser.email,
+                from: process.env.SENDGRID_SENDER_EMAIL,
+                subject: 'Thanyou for buying the course.',
+                html: `
+            <p>Hey,
+            Thanks for purchasing the 30-day python programming course by Ed Spread.
+            You will receive your course completion certificate to your registered mail Id after 30 days from now. 
+            </p>
+            <p>As promised here is the suggested reading of python.</p>
+            <a href="https://drive.google.com/drive/folders/10R8EKXGBvf15E1g0bsYc9lbwH3aFEqk6?usp=sharing">Pdf Link</a>
+            <p>For any questions,
+            Text us on Whatsapp (+91-7842605842)
+            </p>
+            <p>OR</p>
+            <p>Mail us to:</p>
+            <a href="support@edspread.in">Email</a>
+            <p>Thanks & Regards,</p>
+            <h5>ED SPREAD</h5>
+            
+        `,
+            });
+        } catch (err) {
+            console.log(err, 'Thankyou email error');
+            return next(
+                new HttpError(
+                    'Could not send thankyou email,please try again',
+                    500
+                )
+            );
+        }
 
         res.status(200).json({
             status: 'success',
