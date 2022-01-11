@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const User = require('../models/user');
+const Bill = require('../models/bills');
 const HttpError = require('../utils/httpError');
 
 exports.getAllUsers = async (req, res, next) => {
@@ -29,6 +30,52 @@ exports.getAllUsers = async (req, res, next) => {
                     type: '$courseInfo.type',
                     price: '$courseInfo.price',
                     points: '$referralPoints',
+                },
+            },
+        ]);
+
+        res.status(200).json({ status: 'Success', users });
+    } catch (e) {
+        next(new HttpError('Something went wrong, cannot find users!', 500));
+    }
+};
+
+exports.getAllUsersByBills = async (req, res, next) => {
+    try {
+        const users = await Bill.aggregate([
+            {
+                $lookup: {
+                    from: 'courses',
+                    localField: 'course',
+                    foreignField: '_id',
+                    as: 'courseInfo',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$courseInfo',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            { $match: { 'courseInfo.type': 'PAID' } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userInfo',
+                },
+            },
+            {
+                $project: {
+                    name: '$userInfo.name',
+                    mobile: '$userInfo.mobile',
+                    email: '$userInfo.email',
+                    title: '$courseInfo.title',
+                    type: '$courseInfo.type',
+                    price: '$courseInfo.price',
+                    points: '$referralPoints',
+                    purchasedDate: '$createdAt',
                 },
             },
         ]);

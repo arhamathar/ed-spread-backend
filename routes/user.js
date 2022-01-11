@@ -10,7 +10,7 @@ router.get(
     '/all-users',
     protect,
     restrictedTo('ADMIN', 'SUPER_USER'),
-    userController.getAllUsers
+    userController.getAllUsersByBills
 );
 
 router.post(

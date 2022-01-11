@@ -87,7 +87,7 @@ exports.successfulOrder = async (req, res, next) => {
             razorpayPaymentId,
             razorpayOrderId,
             razorpaySignature,
-            createdAt,
+            // createdAt,
             referralCode,
         } = req.body;
 
@@ -115,7 +115,7 @@ exports.successfulOrder = async (req, res, next) => {
             razorpayPaymentId,
             razorpayOrderId,
             razorpaySignature,
-            createdAt,
+            createdAt: new Date().toISOString(),
         });
 
         await newBill.save();
