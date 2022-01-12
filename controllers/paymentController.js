@@ -156,7 +156,7 @@ exports.successfulOrder = async (req, res, next) => {
             await transporter.sendMail({
                 to: payingUser.email,
                 from: process.env.SENDGRID_SENDER_EMAIL,
-                subject: 'Thanyou for buying the course.',
+                subject: 'Thank you for buying the course.',
                 html: `
             <p>Hey,
             Thanks for purchasing the 30-day python programming course by Ed Spread.
@@ -169,7 +169,7 @@ exports.successfulOrder = async (req, res, next) => {
             </p>
             <p>OR</p>
             <p>Mail us to:</p>
-            <a href="support@edspread.in">Email</a>
+            <a href="mailto:support@edspread.in">Email</a>
             <p>Thanks & Regards,</p>
             <h5>ED SPREAD</h5>
             
