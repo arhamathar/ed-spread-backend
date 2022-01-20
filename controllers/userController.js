@@ -74,7 +74,7 @@ exports.getAllUsersByBills = async (req, res, next) => {
                     title: '$courseInfo.title',
                     type: '$courseInfo.type',
                     price: '$courseInfo.price',
-                    points: '$referralPoints',
+                    points: '$userInfo.referralPoints',
                     purchasedDate: '$createdAt',
                 },
             },

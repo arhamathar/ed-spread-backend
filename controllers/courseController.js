@@ -156,6 +156,14 @@ exports.deleteCourse = async (req, res, next) => {
 
 exports.getViewCourse = async (req, res, next) => {
     try {
+        if (!req.user.courses.includes(req.params.courseId)) {
+            return next(
+                new HttpError(
+                    'You have not purchased this course, please buy to watch',
+                    401
+                )
+            );
+        }
         const course = await Course.findById(req.params.courseId);
 
         res.status(200).json({
