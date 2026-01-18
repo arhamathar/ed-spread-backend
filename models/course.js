@@ -38,6 +38,10 @@ const courseSchema = new mongoose.Schema({
         },
     ],
     createdBy: { type: mongoose.Types.ObjectId, ref: 'User' },
+    embedding: {
+        type: [Number],
+        select: false, // Don't return by default to save bandwidth
+    },
 });
 
 module.exports = mongoose.model('Course', courseSchema);
