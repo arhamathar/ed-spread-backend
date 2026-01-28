@@ -12,7 +12,7 @@ const connectDb = () => {
             console.log('Databse connected Successfully!');
         })
         .catch((e) => {
-            console.log('Databse connection failed!');
+            console.log('Databse connection failed!', e);
         });
 };
 

@@ -9,6 +9,8 @@ router.get('/courses', courseController.getAllCourses);
 
 router.get('/bootcamps', courseController.getAllBootcamps);
 
+router.get('/search', courseController.searchCourses);
+
 router.use(protect);
 
 router.get('/my-course/:userId', courseController.getMyCourses);
