@@ -224,9 +224,8 @@ exports.searchCourses = async (req, res) => {
 
         // Generate query embedding
         console.log('Generating embedding for query...');
-        const queryEmbedding = await embeddingService.generateQueryEmbedding(
-            query
-        );
+        const queryEmbedding =
+            await embeddingService.generateQueryEmbedding(query);
 
         // Perform vector search
         console.log('Performing vector search...');
@@ -255,7 +254,7 @@ exports.searchCourses = async (req, res) => {
             },
             {
                 $match: {
-                    score: { $gte: 0.8 },
+                    score: { $gte: 0.7 },
                 },
             },
         ]);
